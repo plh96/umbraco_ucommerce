@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ucommerce.NHibernate</name>
+    </assembly>
+    <members>
+        <member name="T:Ucommerce.NHibernate.Impl.NormalizeCatalogSortOrderQuery">
+            <summary>
+            Given a store id, will make sure all catalogs under it has ascending sort order without gaps or duplicates
+            </summary>
+            <returns>
+            True when any rows were updated
+            False when all rows were already sorted
+            </returns>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.NormalizeCategoryProductSortOrderQuery">
+            <summary>
+            Given a catalog id and an optional parent category id, will make sure all categories under it has ascending sort order without gaps or duplicates
+            </summary>
+            <returns>
+            True when any rows were updated
+            False when all rows were already sorted
+            </returns>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.NormalizeCategorySortOrderQuery">
+            <summary>
+            Given a catalog id and an optional parent category id, will make sure all categories under it has ascending sort order without gaps or duplicates
+            </summary>
+            <returns>
+            True when any rows were updated
+            False when all rows were already sorted
+            </returns>
+        </member>
+        <member name="M:Ucommerce.NHibernate.Impl.ProductsBuiltInPropertiesQuery.FilterProductsBySearchTerm(Ucommerce.Catalog.Models.ProductsBuiltInPropertiesQueryArgs,System.Linq.IQueryable{Ucommerce.EntitiesV2.Product})">
+            <summary>
+            Finds the products to return from the IQueryable based on the args.SearchTerm
+            </summary>
+            <param name="args"></param>
+            <param name="products"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.DiscountAppliedProductPriceQuery">
+            <summary>
+            NHibernate <see cref="T:Ucommerce.NHibernate.NHibernateQueryBase`1"/> that returns all prices with discounts for the input product guids and price group guids.
+            <returns><see cref="T:Ucommerce.Catalog.Models.ProductPriceQueryResult"/> for all product prices and discounts by the product guids and pricegroup guids.</returns>
+            </summary>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.PriceGroupsQuery">
+            <summary>
+            Query that returns a list of PriceGroups filtered by user permissions given a ProductCatalogGroup guid.
+            </summary>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.DefinitionsForTypeQuery">
+            <summary>
+            Query that returns a list of all definitions for a specified DefinitionType.
+            </summary>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.ProductCatalogBuiltInPropertiesQuery">
+            <summary>
+            Query that returns a product catalog's multilingual properties given a guid and culture code.
+            </summary>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.ProductDefinitionsAndDefinitionFieldsQuery">
+            <summary>
+            Alternative to <see cref="T:Ucommerce.NHibernate.Impl.EntityDefinitionsAndDefinitionFieldsQuery"/> for products.
+            Once Products will use the general definition system, this can be removed in favor of the other.
+            </summary>
+        </member>
+        <member name="T:Ucommerce.NHibernate.Impl.ProductPriceQuery">
+            <summary>
+            NHibernate <see cref="T:Ucommerce.NHibernate.NHibernateQueryBase`1"/> that returns all product prices for the input product guids and pricegroup guids.
+            <returns><see cref="T:Ucommerce.Catalog.Models.ProductPriceQueryResult"/> for all product prices filtered by the product guids and pricegroup guids.</returns>
+            </summary>
+            <remarks>This query uses string concat for the guids instead of them being parameterized. This is to work around the 2100 parameter limit in SQL.
+            Some tools might flag this as a SQL injection hazard, but it isn't as these ids are always GUID types. </remarks>
+        </member>
+        <member name="M:Ucommerce.NHibernate.Impl.Services.OrderService.ValidateOrderNumber(System.String)">
+            <summary>
+            Helper method to validate that an orderNumber is unique
+            </summary>
+        </member>
+        <member name="M:Ucommerce.NHibernate.Impl.Services.SortPriorityService.SortByType(System.Int32,System.Int32,Ucommerce.EntitiesV2.ISortable[],Ucommerce.EntitiesV2.ISortable)">
+            <summary>
+            Sort by ISortable inherited type and returns the updated priority for the moved entity
+            </summary>
+            <param name="newPriority"></param>
+            <param name="priorityMovingDirection"></param>
+            <param name="sortables"></param>
+            <param name="typeOfSortable"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

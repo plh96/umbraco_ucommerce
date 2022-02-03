@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ucommerce.Web.Shell</name>
+    </assembly>
+    <members>
+        <member name="F:Ucommerce.Web.Shell.Masterpages.MasterPageShell.ClientDependency">
+            <summary>
+            ClientDependency control.
+            </summary>
+            <remarks>
+            Auto-generated field.
+            To modify, move the field declaration from the designer file to a code-behind file.
+            </remarks>
+        </member>
+        <member name="F:Ucommerce.Web.Shell.Masterpages.MasterPageShell.JavaScriptPlaceHolder">
+            <summary>
+            JavaScriptPlaceHolder control.
+            </summary>
+            <remarks>
+            Auto-generated field.
+            To modify, move the field declaration from the designer file to a code-behind file.
+            </remarks>
+        </member>
+        <member name="F:Ucommerce.Web.Shell.Masterpages.MasterPageShell.CssPlaceHolder">
+            <summary>
+            CssPlaceHolder control.
+            </summary>
+            <remarks>
+            Auto-generated field.
+            To modify, move the field declaration from the designer file to a code-behind file.
+            </remarks>
+        </member>
+        <member name="F:Ucommerce.Web.Shell.Masterpages.MasterPageShell.ContentPlacerHolder">
+            <summary>
+            ContentPlacerHolder control.
+            </summary>
+            <remarks>
+            Auto-generated field.
+            To modify, move the field declaration from the designer file to a code-behind file.
+            </remarks>
+        </member>
+        <member name="F:Ucommerce.Web.Shell.Masterpages.MasterPageShell.ShellJavscriptPlaceHolder">
+            <summary>
+            ShellJavscriptPlaceHolder control.
+            </summary>
+            <remarks>
+            Auto-generated field.
+            To modify, move the field declaration from the designer file to a code-behind file.
+            </remarks>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,211 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ucommerce.Installer</name>
+    </assembly>
+    <members>
+        <member name="M:Ucommerce.Installer.AppsDatabaseInstaller.GetSchemaVersion">
+            <summary>
+            This gets the current schema version, for the current MigrationName.
+            </summary>
+            <remarks>
+            The data is read from the 'Ucommerce_AppSystemVersion' table.
+            If no version could be found, an initial version number of '0' is inserted.
+            </remarks>
+        </member>
+        <member name="M:Ucommerce.Installer.AppsDatabaseInstaller.InsertInitialSchemaVersion(System.Data.SqlClient.SqlConnection)">
+            <summary>
+            Inserts an initial schema version of 0 for the current MigrationName.
+            </summary>
+            <param name="conn">The current database connection. This must be open.</param>
+        </member>
+        <member name="T:Ucommerce.Installer.ConfigFileRenamer">
+            <summary>
+            Command, that given a DirectoryInfo renames all "*.config.default" files to "*.config".
+            </summary>
+        </member>
+        <member name="T:Ucommerce.Installer.Extensions.XmlNodeExtensions">
+            <summary>
+            Extension methods used by the PackageAction implementations.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.Extensions.XmlNodeExtensions.GetAttributeValueFromNode(System.Xml.XmlNode,System.String)">
+            <summary>
+            Gets the value from an attribute or returns an empty string if it wasn't specified
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.FileCopier.#ctor(System.IO.FileInfo,System.IO.FileInfo)">
+            <summary>
+            Copy one file to another. Both path have to be physical, not virtual.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.DbInstaller.InstallDatabase">
+            <summary>
+            Installs relevant migrations
+            </summary>
+            <remarks>
+            Relevant migrations are considered to be the ones with a larger schema version
+            than the current one. -1 is considered an empty database thus all migrations
+            will be installed.
+            </remarks>
+        </member>
+        <member name="M:Ucommerce.Installer.DbInstaller.GetSchemaVersion">
+            <summary>
+            Get the current schema version from database
+            </summary>
+            <returns></returns>
+            <remarks>
+            A clean database with no Ucommerce objects is schema version -1
+            </remarks>
+        </member>
+        <member name="M:Ucommerce.Installer.DbInstaller.UpdateSchemaVersion(Ucommerce.Installer.Migration)">
+            <summary>
+            Updates the data store to the specified schema version
+            </summary>
+            <param name="migration"></param>
+        </member>
+        <member name="M:Ucommerce.Installer.FileMover.#ctor(System.IO.FileInfo,System.IO.FileInfo)">
+            <summary>
+            Copy one file to another. Both path have to be physical, not virtual.
+            </summary>
+            <remarks>
+            If <paramref name="sourceFilename"/> does not exist, <paramref name="targetFilename"/>
+            will be deleted (unless backed-up)
+            </remarks>
+        </member>
+        <member name="T:Ucommerce.Installer.InstallerSteps.DeleteFile">
+            <summary>
+            Responsible for deleting a specified file if it exists. 
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.IInstallerAuthenticationService.LoggedInUserId">
+            <summary>
+            Return the id of the logged in user. 
+            </summary>
+        </member>
+        <member name="T:Ucommerce.Installer.IInstallerLoggingService">
+            <summary>
+            Handles logging of information.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.IInstallerLoggingService.Information``1(System.String)">
+            <summary>
+            Logs the specified <paramref name="message"/> at an Information log level.
+            <param name="message">The custom message.</param>
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.IInstallerLoggingService.Information``1(System.String,System.Object[])">
+            <summary>
+            Logs the specified <paramref name="messageTemplate"/> at an Information log level.
+            <param name="messageTemplate">Message template describing the event.</param>
+            <param name="propertyValues">Objects positionally formatted into the message template.</param>
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.IInstallerLoggingService.Error``1(System.Exception)">
+            <summary>
+            Logs the specified exception at an Error log level.
+            </summary>
+            <param name="exception">The exception.</param>
+        </member>
+        <member name="M:Ucommerce.Installer.IInstallerLoggingService.Error``1(System.Exception,System.String)">
+            <summary>
+            Logs the specified exception along with a message at an Error log level.
+            </summary>
+            <param name="exception">The exception.</param>
+            <param name="message">The custom message.</param>
+        </member>
+        <member name="M:Ucommerce.Installer.IInstallerLoggingService.Error``1(System.Exception,System.String,System.Object[])">
+            <summary>
+            Logs the specified exception along with a custom message at an Error log level.
+            </summary>
+            <param name="exception">The exception.</param>
+            <param name="messageTemplate">Message template describing the event.</param>
+            <param name="propertyValues">Objects positionally formatted into the message template.</param>
+        </member>
+        <member name="T:Ucommerce.Installer.Migration">
+            <summary>
+            Contains schema version number and a sql scrip to update to that version.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.Migration.#ctor(System.String,System.String)">
+            <summary>
+            Creates a migration.
+            </summary>
+            <param name="fileName">File name must follow the convention name.xxx.ext</param>.
+            <param name="migrationScript"></param>
+        </member>
+        <member name="M:Ucommerce.Installer.Migration.GetSchemaVersionFromFileName(System.String)">
+            <summary>
+            Gets the schema version from file name.
+            </summary>
+            <param name="fileName"></param>
+            <returns></returns>
+            <remarks>
+            Ucommerce migration files follows the naming convention of UcommerceDB.xxx.sql.
+            Where xxx is the schema version of the contents.
+            </remarks>
+        </member>
+        <member name="T:Ucommerce.Installer.MigrationLoader">
+            <summary>
+            Loads <see cref="T:Ucommerce.Installer.Migration">migrations</see> from the file system.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Installer.MigrationLoader.GetDatabaseMigrations(System.IO.DirectoryInfo)">
+            <summary>
+            Loads all migration scripts from file system
+            </summary>
+            <remarks>
+            Update scripts follow the naimg convention of UcommerceDB.00x.sql
+            </remarks>
+            <returns></returns>
+        </member>
+        <member name="T:Ucommerce.Installer.ObjectFactoryInitializer">
+            <summary>
+            This class is used to initialize the Object Factory IOC Container instance.
+            </summary>
+            <remarks>
+            In installation scenarios, there is a race condition, when the assemblies are updated
+            along with the configuration files.
+            
+            No matter what is done first, if the IOC configuration is initialized when only half the update is done,
+            the confguration might not match the assemblies, thus causing an exception to be thrown.
+            
+            Since the configuration is read only once, we can get around this issue,
+            by forcing a read before starting to modify the assemblies or config.
+            
+            We know the assemblies and configuration are in sync at the start of the first installation step.
+            </remarks>
+        </member>
+        <member name="M:Ucommerce.Installer.Prerequisites.impl.CanModifyFiles.HasWriteDataRole(System.Security.Principal.WindowsIdentity)">
+            <summary>
+            Determines weather a user has write permission for directory.
+            </summary>
+            <param name="user"></param>
+            <returns></returns>
+            <remarks></remarks>
+        </member>
+        <member name="M:Ucommerce.Installer.Prerequisites.impl.CanModifyFiles.IsBuiltInWindowsAdministrator(System.Security.Principal.WindowsIdentity)">
+            <summary>
+            Determines weather current user is flaged as Administrator in Windows.
+            </summary>
+            <param name="user"></param>
+            <returns></returns>
+            <remarks>
+            We need to determine weather currentuser is administrator as administrators might not be
+            in write role for a current subfolder, but would have the permissions to modify files anyways as he is administrator. 
+            </remarks>
+        </member>
+        <member name="M:Ucommerce.Installer.RuntimeVersionChecker.GetUcommerceRuntimeAssemblyVersion">
+            <summary>
+            Finds current Ucommerce version as loaded in the runtime
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Installer.RuntimeVersionChecker.GetUcommerceDatabaseAssemblyVersion">
+            <summary>
+            Finds the Ucommerce version installed in the database. Version will be 0.0.0.0 if version doesn't exists.
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

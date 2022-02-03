@@ -1,0 +1,814 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ucommerce.Api</name>
+    </assembly>
+    <members>
+        <member name="T:Ucommerce.Api.CatalogContext">
+            <summary>
+            BOLT implementation of <see cref="T:Ucommerce.Api.ICatalogContext" />
+            </summary>
+            <remarks>
+            This implementation assumes that the current <see cref="T:System.Web.HttpRequest"/> contains the keys
+            of the current catalog (Request["Catalog"]), product SKU (Request["ProductId"]), and category (Request["Category"]).
+            </remarks>
+        </member>
+        <member name="P:Ucommerce.Api.CatalogContext.CurrentPriceGroup">
+            <summary>
+            Uses the price group configured on the current catalog by default.
+            </summary>
+            <remarks>
+            Persists overridden <see cref="T:Ucommerce.Search.Models.PriceGroup"/> and checks whether it's allowed
+            for current store upon getting the choice.
+            </remarks>
+            <value>
+            The currenct price group.
+            </value>
+        </member>
+        <member name="M:Ucommerce.Api.CatalogLibrary.CalculatePrices(System.Collections.Generic.IList{System.Guid},System.Collections.Generic.IList{System.Guid})">
+            <summary>
+            Calculates prices for the products.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.CatalogLibrary.GetProducts(System.Collections.Generic.IList{System.Guid},Ucommerce.Search.Facets.FacetDictionary,System.UInt32,System.UInt32)">
+            <summary>
+            Queries products based on categories and search parameters.
+            </summary>
+            <param name="categoryIds">Categories that provides the products</param>
+            <param name="facets">List of facet filters.</param>
+            <param name="skip"></param>
+            <param name="take"></param>
+            <returns>Facets with values and hits corresponding to the search parameters.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.CatalogLibrary.GetProducts(System.Guid,Ucommerce.Search.Facets.FacetDictionary,System.UInt32,System.UInt32)">
+            <summary>
+            Queries products based on a category and search parameters.
+            </summary>
+            <param name="categoryId">Category that provides the products</param>
+            <param name="facets">List of facet filters.</param>
+            <param name="skip"></param>
+            <param name="take"></param>
+            <returns>Facets with values and hits corresponding to the search parameters.</returns>
+        </member>
+        <member name="T:Ucommerce.Api.ICatalogLibrary">
+            <summary>
+            This interface is designed to provide catalog information. This includes categories, products and search indexes. It is meant for visitors only, and should only be used within an HttpContext.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetCatalog(System.Nullable{System.Guid})">
+            <summary>
+            Gets the catalog in the current <see cref="T:Ucommerce.Api.CatalogContext"/>.
+            </summary>
+            <param name="catalogId">If catalogId is provided, it will look in the ProductCatalogIndex for the catalog with that specific Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetRootCategories(System.Nullable{System.Guid},System.UInt32,System.UInt32)">
+            <summary>
+            Gets the categories without a parent from the current <see cref="T:Ucommerce.Api.CatalogContext"/>.
+            </summary>
+            <param name="catalogId">If the catalog Id is passed in, it will return the root categories in the provided catalog</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetCategory(System.Nullable{System.Guid})">
+            <summary>
+            Gets the current category in the current <see cref="T:Ucommerce.Api.CatalogContext"/>.
+            </summary>
+            <param name="categoryId">If provided, will search for a specific category in the search index</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetCategories(System.Collections.Generic.IList{System.Guid},System.UInt32,System.UInt32)">
+            <summary>
+            Gets categories based on the list of category guids passed.
+            </summary>
+            <param name="categoryIds">Provide a list of guids to get categories from the search index</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetProducts(System.Nullable{System.Guid},System.UInt32,System.UInt32)">
+            <summary>
+            Gets products in the current category.
+            </summary>
+            <param name="categoryId">If provided, will search for products in the specific category in the search index</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetProduct(System.String)">
+            <summary>
+            Gets either a product with no variants or a product family. Does not get variants.
+            </summary>
+            <param name="sku">Product identifier</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.CalculatePrices(System.Collections.Generic.IList{System.Guid},System.Collections.Generic.IList{System.Guid})">
+            <summary>
+            Gives a list of prices for the products based on product and price group parameters.
+            </summary>
+            <param name="productGuids">Provide a list of product ids to get their prices</param>
+            <param name="priceGroupGuids">If not provided, will default to the CurrentPriceGroup of <see cref="T:Ucommerce.Api.CatalogContext"/></param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.ChangePriceGroup(System.Guid,System.Boolean)">
+            <summary>
+            Changes the current price group for the visitor. Price group is stored as a cookie.
+            </summary>
+            <param name="priceGroupGuid">Provide the price group you want to change to</param>
+            <param name="changeBasketBillingCurrency">Will change the currency on the basket by default. If the products do not have corresponding prices, they will be removed from basket</param>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetVariants(Ucommerce.Search.Models.Product)">
+            <summary>
+            Gets variants of the product.
+            </summary>
+            <param name="product">Product that provides the variants</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetProducts(System.Collections.Generic.IList{System.Guid},Ucommerce.Search.Facets.FacetDictionary,System.UInt32,System.UInt32)">
+            <summary>
+            Queries the product index based on categories and facets.
+            </summary>
+            <param name="categoryIds">Categories that contain the products</param>
+            <param name="facets">Dictionary list of facets</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetProducts(System.Guid,Ucommerce.Search.Facets.FacetDictionary,System.UInt32,System.UInt32)">
+            <summary>
+            Queries products based on a category and facets.
+            </summary>
+            <param name="categoryId">Category that contains the products</param>
+            <param name="facets">Dictionary list of facets</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetFacets(System.Guid,Ucommerce.Search.Facets.FacetDictionary,System.UInt32,System.UInt32)">
+            <summary>
+            Gets facets for products. For multi-category product lists, use the method overload that takes in a list of category ids.
+            </summary>
+            <param name="categoryId">Category that contains the products</param>
+            <param name="facets">Dictionary list of facets</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ICatalogLibrary.GetFacets(System.Collections.Generic.IList{System.Guid},Ucommerce.Search.Facets.FacetDictionary,System.UInt32,System.UInt32)">
+            <summary>
+            Gets facets for products.
+            </summary>
+            <param name="categoryIds">Categories that provides the products</param>
+            <param name="facets">Dictionary list of facets</param>
+            <param name="skip">Skips over the first x values in the query result. Default: 0</param>
+            <param name="take">Takes x values from the query result. Default: 64</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.IMarketingLibrary.AddVoucher(System.String)">
+            <summary>
+            Adds voucher code to the user's current basket.
+            </summary>
+            <param name="voucherCode">The voucher code.</param>
+            <returns>True if successful.</returns>
+            <returns>True if already applied.</returns>
+            <returns>False if campaign does not apply to store.</returns>
+            <returns>False if campaign is not active.</returns>
+            <returns>False if campaign item is disabled.</returns>
+            <returns>False if voucher code is emtpy.</returns>
+            <returns>False if no voucher is found with the given code.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.IMarketingLibrary.GetTargetedCampaignItems">
+            <summary>
+            Gets list of <see cref="T:Ucommerce.EntitiesV2.CampaignItem">campaign items</see>, which <see cref="T:Ucommerce.Marketing.Targets.ITarget">targets</see> are satisfied by the current CatalogContext.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.IMarketingLibrary.GetTargetedCampaignItems(Ucommerce.EntitiesV2.Product)">
+            <summary>
+            Gets all <see cref="T:Ucommerce.EntitiesV2.CampaignItem">campaign items</see>, which <see cref="T:Ucommerce.Marketing.Targets.ITarget">targets</see> are satisfied, for the given <see cref="T:Ucommerce.EntitiesV2.Product"/>.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.IMarketingLibrary.GetTargetedCampaignItemsForIndividualProducts(System.Collections.Generic.IEnumerable{Ucommerce.EntitiesV2.Product})">
+            <summary>
+            Gets lists of all <see cref="T:Ucommerce.EntitiesV2.CampaignItem">campaign items</see>, which have <see cref="T:Ucommerce.Marketing.Targets.ITarget">targets</see> satisfied for each of the <see cref="T:Ucommerce.EntitiesV2.Product">products</see> given.
+            </summary>
+            <remarks>
+            This method is the multi-product version of the <see cref="M:Ucommerce.Api.MarketingLibrary.GetTargetedCampaignItems(Ucommerce.EntitiesV2.Product)"/> method.
+            </remarks>
+        </member>
+        <member name="M:Ucommerce.Api.IMarketingLibrary.GetSingleProductCampaignItems">
+            <summary>
+            Gets list of all <see cref="T:Ucommerce.EntitiesV2.CampaignItem">campaign items</see>, which have only one <see cref="T:Ucommerce.EntitiesV2.Product"/> as a <see cref="T:Ucommerce.Marketing.Targets.ITarget">target</see>.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.MarketingLibrary.GetTargetedCampaignItems(Ucommerce.EntitiesV2.Product)">
+            <summary>
+            Gets all <see cref="T:Ucommerce.EntitiesV2.CampaignItem">campaign items</see>, which <see cref="T:Ucommerce.Marketing.Targets.ITarget">targets</see> are satisfied, for the given <see cref="T:Ucommerce.EntitiesV2.Product"/>.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.MarketingLibrary.GetTargetedCampaignItemsForIndividualProducts(System.Collections.Generic.IEnumerable{Ucommerce.EntitiesV2.Product})">
+            <summary>
+            Gets lists of all <see cref="T:Ucommerce.EntitiesV2.CampaignItem">campaign items</see>, which have <see cref="T:Ucommerce.Marketing.Targets.ITarget">targets</see> satisfied for each of the <see cref="T:Ucommerce.EntitiesV2.Product">products</see> given.
+            </summary>
+            <remarks>
+            This method is the multi-product version of the <see cref="M:Ucommerce.Api.MarketingLibrary.GetTargetedCampaignItems(Ucommerce.EntitiesV2.Product)"/> method.
+            </remarks>
+        </member>
+        <member name="T:Ucommerce.Api.Marketing.TargetingContextPopulators.PriceGroupPopulator">
+            <summary>
+            Class responsible for populating the targeting context with the current price group.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.Marketing.TargetingContextPopulators.PriceGroupPopulator.#ctor(Ucommerce.EntitiesV2.IRepository{Ucommerce.EntitiesV2.PriceGroup})">
+            <summary>
+            Constructs a new <see cref="T:Ucommerce.Api.Marketing.TargetingContextPopulators.PriceGroupPopulator"/>.
+            </summary>
+            <param name="priceGroup"></param>
+        </member>
+        <member name="M:Ucommerce.Api.Marketing.TargetingContextPopulators.PriceGroupPopulator.Populate``1(``0,Ucommerce.Marketing.TargetingContext)">
+            <summary>
+            Populate the targeting context with the current price group.
+            </summary>
+        </member>
+        <member name="T:Ucommerce.Api.Marketing.TargetingContextPopulators.ProductCatalogPopulator">
+            <summary>
+            Populates <see cref="T:Ucommerce.Marketing.TargetingContext"/> with current catalog as specified in <see cref="T:Ucommerce.Api.ICatalogContext"/>.
+            </summary>
+        </member>
+        <member name="T:Ucommerce.Api.Marketing.TargetingContextPopulators.ProductPopulator">
+            <summary>
+            Populates the <see cref="T:Ucommerce.Marketing.TargetingContext">targeting context</see> with <see cref="T:Ucommerce.EntitiesV2.Product">products</see>.
+            </summary>
+            <remarks>
+            The populate method searches for products in the current <see cref="T:Ucommerce.EntitiesV2.Category">category</see> and current <see cref="T:Ucommerce.EntitiesV2.Product">product</see>.
+            </remarks>
+        </member>
+        <member name="T:Ucommerce.Api.IOrderContext">
+            <summary>
+            Provides context for the transaction system.
+            </summary>
+        </member>
+        <member name="P:Ucommerce.Api.IOrderContext.HasBasket">
+            <summary>
+            Gets a value indicating whether or not the current
+            user has a basket.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.IOrderContext.GetBasket">
+            <summary>
+            Gets the user's basket. If the user does not have a basket
+            one will be created.
+            </summary>
+            <returns>The basket.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.IOrderContext.GetBasket(System.Boolean)">
+            <summary>
+            Gets the user's basket. If the user does not have a basket
+            one will be created.
+            </summary>
+            <param name="create">Indicates whether a new basket should be created if one doesn't exist</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.IOrderContext.GetBasket(System.Guid)">
+            <summary>
+            Gets a specific basket by its id
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.IOrderContext.ClearBasketInformation">
+            <summary>
+            Delete persistent basket
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.IOrderContext.CreateBasket(Ucommerce.EntitiesV2.Currency)">
+            <summary>
+            Crates a new <see cref="T:Ucommerce.EntitiesV2.Basket"/> for the <see cref="T:Ucommerce.EntitiesV2.Customer"/>.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.HasBasket">
+            <summary>
+            Checks if there current user has basket.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetBasket(System.Boolean)">
+            <summary>
+            Gets the current basket.
+            </summary>
+            <param name="create">If set to <c>true</c> and no basket currently exists, it will return a new basket.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <see name="create"/> is <c>false</c> and no basket is found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.NewBasket(System.String)">
+            <summary>
+            Returns a new basket.
+            </summary>
+            <param name="catalogName">Sets the currency of the basket based on the provided catalog.</param>
+            <exception cref="T:System.ArgumentException">Thrown if no catalog is found or no basket was created.</exception>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">Thrown if the provided catalog does not have a price group.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPurchaseOrderByPaymentReference(System.String)">
+            <summary>
+            Returns the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/> with the provided payment reference id.
+            </summary>
+            <param name="paymentReferenceId">Id provided by the payment provider.</param>
+            <exception cref="T:System.ArgumentException">Thrown if no payment or purchase order is found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPurchaseOrder(System.String,System.Boolean)">
+            <summary>
+            Returns the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/> with the provided order number.
+            </summary>
+            <param name="orderNumber">The order number (or order Guid in string format) of the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/>.</param>
+            <param name="validateForCurrentMember">If set to <c>true</c>, it will check if the purchase belongs to the member.</param>
+            <exception cref="T:System.ArgumentException">Thrown if
+            <p>member is not logged in.</p>
+            <p>- or - </p>
+            <p>purchase order does not belong to member.</p>
+            <p>- or - </p>
+            <p>purchase order is not found.</p>
+            </exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPurchaseOrder(System.Guid)">
+            <summary>
+            Gets a purchase order based on Guid.
+            </summary>
+            <param name="guid">The Guid of the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/>.</param>
+            <returns></returns>
+            <exception cref="T:System.ArgumentException">Thrown if no purchase order is found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.AddToBasket(System.Int32,System.Guid,System.Nullable{System.Guid},System.Nullable{System.Decimal},System.Nullable{System.Guid},System.Boolean,System.Boolean,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Adds an <see cref="T:Ucommerce.EntitiesV2.OrderLine"/> to basket.
+            </summary>
+            <param name="quantity">The quantity.</param>
+            <param name="productId">The guid of the product.</param>
+            <param name="variantId">The guid of the optional variant.</param>
+            <param name="unitPrice">If provided it will overwrite the product's unit price. Adds "HasCustomPrice" property on the order.</param>
+            <param name="priceGroupId">If provided it will overwrite the product's price group.</param>
+            <param name="addToExistingLine">If set to <c>true</c> [add to existing line].</param>
+            <param name="executeBasketPipeline">If set to <c>true</c> [execute basket pipeline].</param>
+            <param name="properties">Order properties to include in the AddToBasket pipeline. These are stored under uCommerce_OrderProperty.</param>
+            <exception cref="T:System.ArgumentException">Thrown if
+            <p>Product is not found.</p>
+            <p>- or - </p>
+            <p>Variant is not found.</p>
+            <p>- or - </p>
+            <p>Product can not be added to the basket.</p>
+            </exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if no price group is found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.AddToBasket(System.Int32,System.String,System.String,System.Nullable{System.Decimal},System.Nullable{System.Guid},System.Boolean,System.Boolean,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Adds an <see cref="T:Ucommerce.EntitiesV2.OrderLine"/> to basket.
+            </summary>
+            <param name="quantity">The quantity.</param>
+            <param name="sku">The sku of the product.</param>
+            <param name="variantSku">The sku of the optional variant.</param>
+            <param name="unitPrice">If provided it will overwrite the product's unit price. Adds "HasCustomPrice" property on the order.</param>
+            <param name="priceGroupId">If provided it will overwrite the product's price group.</param>
+            <param name="addToExistingLine">If set to <c>true</c> [add to existing line].</param>
+            <param name="executeBasketPipeline">If set to <c>true</c> [execute basket pipeline].</param>
+            <param name="properties">Order properties to include in the AddToBasket pipeline. These are stored under uCommerce_OrderProperty.</param>
+            <exception cref="T:System.ArgumentException">Thrown if
+            <p>Product is not found.</p>
+            <p>- or - </p>
+            <p>Variant is not found.</p>
+            <p>- or - </p>
+            <p>Product can not be added to the basket.</p>
+            </exception>
+            <exception cref="T:System.ArgumentNullException">Thrown if no price group is found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.UpdateLineItemByOrderLineId(System.Int32,System.Int32)">
+            <summary>
+            Updates quantity of <see cref="T:Ucommerce.EntitiesV2.OrderLine"/> by order line id.
+            </summary>
+            <param name="orderLineId">Id of the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.</param>
+            <param name="newQuantity">Updated quantity. If set to 0, it will remove the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.UpdateLineItem(System.Int32,System.Int32)">
+            <summary>
+            Updates quantity of <see cref="T:Ucommerce.EntitiesV2.OrderLine"/> by line item index.
+            </summary>
+            <param name="lineItemIndex">Index of the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.</param>
+            <param name="newQuantity">Updated quantity. If set to 0, it will remove the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.DeleteLineItem(System.Int32)">
+            <summary>
+            Removes the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/> from the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/>
+            </summary>
+            <param name="lineItemIndex">Index of the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.ClearBasket">
+            <summary>
+            Clears the current basket. By default, stored in the cookie/session.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.Checkout">
+            <summary>
+            Executes the checkout pipeline.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.AssignOrderNumber(System.String)">
+            <summary>
+            Assigns an order number to the basket.
+            </summary>
+            <param name="orderNumber">If order number null, it will auto-set one.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.ExecuteOrderPipeline(System.String)">
+            <summary>
+            Executes the pipeline on the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/>.
+            </summary>
+            <param name="pipelineName">Name of the desired pipeline.</param>
+            <exception cref="T:Ucommerce.Pipelines.PipelineException">Thrown if the provided pipeline executed with <c>Error</c></exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.ExecuteBasketPipeline">
+            <summary>
+            Executes the basket pipeline.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.SetPurchaseOrderNote(System.String)">
+            <summary>
+            Adds a note to the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/>.
+            </summary>
+            <param name="note">Note for the <see cref="T:Ucommerce.EntitiesV2.PurchaseOrder"/>.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.SetOrderProperty(System.Int32,System.String,System.String)">
+            <summary>
+            Sets an <see cref="T:Ucommerce.EntitiesV2.OrderProperty"/> on the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.
+            </summary>
+            <param name="lineItemIndex">Index of the <see cref="T:Ucommerce.EntitiesV2.OrderLine"/>.</param>
+            <param name="key">Key of the property.</param>
+            <param name="value">Value of the property.</param>
+            <exception cref="T:System.ArgumentException">Thrown if the line item is not found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.SetOrderProperty(System.String,System.String)">
+            <summary>
+            Sets an <see cref="T:Ucommerce.EntitiesV2.OrderProperty"/> on the basket.
+            </summary>
+            <param name="key">Key of the property.</param>
+            <param name="value">Value of the property.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.EditBillingInformation(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Creates or updates the billing <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/>.
+            </summary>
+            <param name="firstName">Billing first name.</param>
+            <param name="lastName">Billing last name.</param>
+            <param name="emailAddress">Billing email address.</param>
+            <param name="phoneNumber">Billing phone number.</param>
+            <param name="mobilePhoneNumber">Billing mobile number.</param>
+            <param name="company">Billing company.</param>
+            <param name="line1">Billing line 1.</param>
+            <param name="line2">Billing line 2.</param>
+            <param name="postalCode">Billing postal code.</param>
+            <param name="city">Billing city.</param>
+            <param name="state">Billing state.</param>
+            <param name="attention">Billing attention.</param>
+            <param name="countryId">Billing country id.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.EditShippingInformation(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Creates or updates the shipping <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/> with default address name.
+            </summary>
+            <param name="firstName">Shipping first name.</param>
+            <param name="lastName">Shipping last name.</param>
+            <param name="emailAddress">Shipping email address.</param>
+            <param name="phoneNumber">Shipping phone number.</param>
+            <param name="mobilePhoneNumber">Shipping mobile number.</param>
+            <param name="company">Shipping company.</param>
+            <param name="line1">Shipping line 1.</param>
+            <param name="line2">Shipping line 2.</param>
+            <param name="postalCode">Shipping postal code.</param>
+            <param name="city">Shipping city.</param>
+            <param name="state">Shipping state.</param>
+            <param name="attention">Shipping attention.</param>
+            <param name="countryId">Shipping country id.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.EditShipmentInformation(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Creates or updates the shipping <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/>.
+            </summary>
+            <param name="addressName">Shipping address name.</param>
+            <param name="firstName">Shipping first name.</param>
+            <param name="lastName">Shipping last name.</param>
+            <param name="emailAddress">Shipping email address.</param>
+            <param name="phoneNumber">Shipping phone number.</param>
+            <param name="mobilePhoneNumber">Shipping mobile number.</param>
+            <param name="company">Shipping company.</param>
+            <param name="line1">Shipping line 1.</param>
+            <param name="line2">Shipping line 2.</param>
+            <param name="postalCode">Shipping postal code.</param>
+            <param name="city">Shipping city.</param>
+            <param name="state">Shipping state.</param>
+            <param name="attention">Shipping attention.</param>
+            <param name="countryId">Shipping country id.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.EditCustomerAddress(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Creates or updates the customer <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/>.
+            </summary>
+            <param name="addressName">Customer address name.</param>
+            <param name="firstName">Customer first name.</param>
+            <param name="lastName">Customer last name.</param>
+            <param name="emailAddress">Customer email address.</param>
+            <param name="phoneNumber">Customer phone number.</param>
+            <param name="mobilePhoneNumber">Customer mobile number.</param>
+            <param name="company">Customer company.</param>
+            <param name="line1">Customer line 1.</param>
+            <param name="line2">Customer line 2.</param>
+            <param name="postalCode">Customer postal code.</param>
+            <param name="city">Customer city.</param>
+            <param name="state">Customer state.</param>
+            <param name="attention">Customer attention.</param>
+            <param name="countryId">Customer country id.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.EditOrderAddress(System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.Int32)">
+            <summary>
+            Creates or updates an <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/> based on the address name.
+            </summary>
+            <param name="addressName">Address name.</param>
+            <param name="firstName">First name.</param>
+            <param name="lastName">Last name.</param>
+            <param name="emailAddress">Email address.</param>
+            <param name="phoneNumber">Phone number.</param>
+            <param name="mobilePhoneNumber">Mobile number.</param>
+            <param name="company">Company.</param>
+            <param name="line1">Line 1.</param>
+            <param name="line2">Line 2.</param>
+            <param name="postalCode">Postal code.</param>
+            <param name="city">City.</param>
+            <param name="state">State.</param>
+            <param name="attention">Attention.</param>
+            <param name="countryId">Country id.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPaymentMethods(System.String)">
+            <summary>
+            Gets the payment methods.
+            </summary>
+            <param name="shippingAddressName">Name of the shipping address.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPaymentMethods(Ucommerce.EntitiesV2.Country)">
+            <summary>
+            Gets the payment methods.
+            </summary>
+            <param name="country">The country.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPaymentMethods(Ucommerce.Search.Models.ProductCatalogGroup,Ucommerce.EntitiesV2.Country)">
+            <summary>
+            Gets the payment methods.
+            </summary>
+            <param name="productCatalogGroup">The product catalog group.</param>
+            <param name="country">The country.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.CreatePayment(System.Int32)">
+            <summary>
+            Creates the payment on the customer's basket. If basket already has a payment, it will be overwritten. 
+            </summary>
+            <param name="paymentMethodId">The payment method id.</param>
+            <exception cref="T:System.ArgumentException">Thrown if the payment method is not found.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown if payment method service is not found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.CreatePayment(System.Int32,System.Decimal)">
+            <summary>
+            Creates the payment on the customer's basket. If basket already has a payment, it will be overwritten. 
+            </summary>
+            <param name="paymentMethodId">The payment method id.</param>
+            <param name="amount">The amount.</param>
+            <exception cref="T:System.ArgumentException">Thrown if the payment method is not found.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown if payment method service is not found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.CreatePayment(System.Int32,System.Decimal,System.Boolean)">
+            <summary>
+            Creates the payment on the customer's basket. If basket already has a payment, it will be overwritten. 
+            </summary>
+            <param name="paymentMethodId">The payment method id.</param>
+            <param name="amount">The amount.</param>
+            <param name="requestPayment">If set to <c>true</c> [request payment].</param>
+            <exception cref="T:System.ArgumentException">Thrown if the payment method is not found.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown if payment method service is not found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.CreatePayment(System.Int32,System.Decimal,System.Boolean,System.Boolean)">
+            <summary>
+            Creates the payment on the customer's basket.
+            </summary>
+            <param name="paymentMethodId">The payment method id.</param>
+            <param name="amount">The amount.</param>
+            <param name="requestPayment">If set to <c>true</c> [request payment].</param>
+            <param name="overwriteExisting">If set to <c>true</c> [overwrite existing] payment.</param>
+            <exception cref="T:System.ArgumentException">Thrown if the payment method is not found.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown if payment method service is not found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.RenderPaymentForm(System.String)">
+            <summary>
+            Renders the payment form.
+            </summary>
+            <param name="paymentIdentifier">The payment identifier.</param>
+            <exception cref="T:System.NullReferenceException"> Thrown if
+            <p>no payment was found with <paramref name="paymentIdentifier"/>.</p>
+            <p>- or - </p>
+            <p>no payment method service was found for the payment method set on the payment.</p>
+            </exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.RequestPayment(System.Int32)">
+            <summary>
+            Requests the payment.
+            </summary>
+            <param name="paymentId">The payment id.</param>
+            <exception cref="T:System.InvalidOperationException"> Thrown if
+            <p>payment with provided id is not found.</p>
+            <p>- or - </p>
+            <p>no basket was found to contain the payment with the given <paramref name="paymentId"/>.</p>
+            </exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetPaymentPageUrl(Ucommerce.EntitiesV2.Payment)">
+            <summary>
+            Returns the external payment URL. This URL redirects the customer to the payment page.
+            </summary>
+            <param name="payment">The payment.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetCountries">
+            <summary>
+            Returns the countries configured in Ucommerce.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetShippingMethods(System.String)">
+            <summary>
+            Returns a collection of <see cref="T:Ucommerce.EntitiesV2.ShippingMethod"/>s available for the country of the shipping address.
+            </summary>
+            <param name="shippingAddressName">The shipping address name.</param>
+            <exception cref="T:System.InvalidOperationException">Thrown if no shipping address is found with either <paramref name="shippingAddressName"/> or default shipping address name.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetShippingMethod(System.String)">
+            <summary>
+            Returns the  <see cref="T:Ucommerce.EntitiesV2.ShippingMethod"/> of the first shipment on the basket.
+            </summary>
+            <param name="addressName">If <c>null</c> then method returns the first shipping with a default shipping name.</param>
+            <returns><c>Null</c> if shipment with <paramref name="addressName"/> or default address name is not found.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetShippingMethods(Ucommerce.EntitiesV2.Country)">
+            <summary>
+            Returns a collection of <see cref="T:Ucommerce.EntitiesV2.ShippingMethod"/> based on country.
+            </summary>
+            <param name="country">The country.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetShippingMethods(Ucommerce.Search.Models.ProductCatalogGroup,Ucommerce.EntitiesV2.Country)">
+            <summary>
+            Returns a collection of <see cref="T:Ucommerce.EntitiesV2.ShippingMethod"/> based on the <see cref="T:Ucommerce.Search.Models.ProductCatalogGroup"/> and country.
+            </summary>
+            <param name="productCatalogGroup">The product catalog group.</param>
+            <param name="country">The country.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.CreateShipment(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Creates a shipment on the current basket.
+            </summary>
+            <param name="shippingMethodId">The shipping method id.</param>
+            <param name="addressName">The address name.</param>
+            <param name="overwriteExisting">If set to <c>false</c>, [overwrite existing].</param>
+            <exception cref="T:System.ArgumentException"> Thrown if
+            <p>shipment method is not found.</p>
+            <p>- or - </p>
+            <p>address with <paramref name="addressName"/> is not found.</p>
+            </exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.DeleteShipment(System.Int32)">
+            <summary>
+            Deletes a shipment from the current basket.
+            </summary>
+            <param name="shipmentId">The shipment id.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetShippingInformation(System.String)">
+            <summary>
+            Returns the current baskets shipping information. 
+            </summary>
+            <param name="addressName">If <c>null</c>, the method uses default shipping address name.</param>
+            <returns>New <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/> if no shipping information is found.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetBillingInformation">
+            <summary>
+            Returns the current baskets billing information. 
+            </summary>
+            <returns>New <see cref="T:Ucommerce.EntitiesV2.OrderAddress"/> if no billing information is found.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.GetMemberOrderHistory(System.String,System.Boolean)">
+            <summary>
+            Returns a list of orders for the logged in user.
+            </summary>
+            <param name="statusName">The status.</param>
+            <param name="allCatalogGroups">If <c>false</c>, the method looks in the current catalog group."/></param>
+            <exception cref="T:System.ArgumentException">Thrown if no member is logged in.</exception>
+            <exception cref="T:System.Configuration.ConfigurationErrorsException">Thrown if <paramref name="allCatalogGroups"/> is set to <c>false</c> and no current catalog group is found.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.SendEmail(System.String,System.String)">
+            <summary>
+            Sends email of selected type to the current user's billing email address.
+            </summary>
+            <param name="emailTypeName">The email type.</param>
+            <param name="orderNumber">The order number.</param>
+            <exception cref="T:System.InvalidOperationException">Thrown if billing address has not email address.</exception>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.SendEmail(System.String,System.String,System.String)">
+            <summary>
+            Sends email of selected type to a specified email address. 
+            </summary>
+            <param name="receiverEmailAddress">The receiver email address.</param>
+            <param name="emailTypeName">The email type.</param>
+            <param name="orderNumber">The order number.</param>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.FormatCurrency(System.String)">
+            <summary>
+            Formats the amount to a decimal string based on current culture.
+            </summary>
+            <param name="amount">The amount.</param>
+            <returns>NaN if provided value can not pe parsed.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.FormatCurrency(System.Nullable{System.Decimal})">
+            <summary>
+            Formats the amount to a decimal string based on current culture.
+            </summary>
+            <param name="amount">The amount.</param>
+            <returns>NaN if the decimal is Null.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.FormatCurrency(System.String,System.String)">
+            <summary>
+            Formats the amount to a decimal string based on given culture.
+            </summary>
+            <param name="amount">The amount.</param>
+            <param name="cultureCode">The culture code.</param>
+            <returns>NaN if provided value can not pe parsed.</returns>
+        </member>
+        <member name="M:Ucommerce.Api.ITransactionLibrary.FormatCurrency(System.Nullable{System.Decimal},System.String)">
+            <summary>
+            Formats the amount to a decimal string based on given culture.
+            </summary>
+            <param name="amount">The amount.</param>
+            <param name="cultureCode">The culture code.</param>
+            <returns>NaN if the decimal is Null.</returns>
+        </member>
+        <member name="T:Ucommerce.Api.TransactionLibrary">
+            <summary>
+            Implementation of the Transaction API.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.AddToBasket(System.Int32,System.Guid,System.Nullable{System.Guid},System.Nullable{System.Decimal},System.Nullable{System.Guid},System.Boolean,System.Boolean,System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Adds to basket.
+            </summary>
+            <param name="quantity">The quantity.</param>
+            <param name="productId">The guid of the product.</param>
+            <param name="variantId">The guid of the optional variant</param>
+            <param name="unitPrice"></param>
+            <param name="priceGroupId"></param>
+            <param name="addToExistingLine">if set to <c>true</c> [add to existing line].</param>
+            <param name="executeBasketPipeline">if set to <c>true</c> [execute basket pipeline].</param>
+            <param name="properties">Properties to include in PipelineArgs</param>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.GetPaymentMethods(System.String)">
+            <summary>
+            Gets the payment methods.
+            </summary>
+            <param name="shippingAddressName">Name of the shipping address.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.GetPaymentMethods(Ucommerce.EntitiesV2.Country)">
+            <summary>
+            Gets the payment methods.
+            </summary>
+            <param name="country">The country.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.GetPaymentMethods(Ucommerce.Search.Models.ProductCatalogGroup,Ucommerce.EntitiesV2.Country)">
+            <summary>
+            Gets the available payment methods for the specified product catalog group and country.
+            </summary>
+            <param name="productCatalogGroup">The product catalog group</param>
+            <param name="country">The country.</param>
+            <returns></returns>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.CreatePayment(System.Int32,System.Decimal,System.Boolean,System.Boolean)">
+            <summary>
+            Creates the payment.
+            </summary>
+            <param name="paymentMethodId">The payment method id.</param>
+            <param name="amount">The amount.</param>
+            <param name="requestPayment">If set to <c>true</c> [request payment].</param>
+            <param name="overwriteExisting">If set to <c>true</c> [overwrite existing].</param>
+            <exception cref="T:System.ArgumentException"></exception>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.RenderPaymentForm(System.String)">
+            <summary>
+            Renders the payment form.
+            </summary>
+            <param name="paymentIdentifier">The payment identifier.</param>
+            <returns></returns>
+            <exception cref="T:System.NullReferenceException"></exception>
+        </member>
+        <member name="M:Ucommerce.Api.TransactionLibrary.RequestPayment(System.Int32)">
+            <summary>
+            Requests the payment.
+            </summary>
+            <param name="paymentId">The payment id.</param>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+    </members>
+</doc>

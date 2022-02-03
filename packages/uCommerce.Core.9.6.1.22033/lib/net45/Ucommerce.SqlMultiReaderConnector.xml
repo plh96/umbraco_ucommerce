@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ucommerce.SqlMultiReaderConnector</name>
+    </assembly>
+    <members>
+        <member name="M:Ucommerce.SqlMultiReaderConnector.Extensions.EnumerableGuidExtensions.AsTableParameter(System.Collections.Generic.IEnumerable{System.Guid})">
+             <summary>
+             This defeats the SQL Server 2100 parameter limit by wrapping ids in a DataTable.
+             The datatable has the same type as the DB type dbo.uCommerce_GuidList:
+                CREATE TYPE [dbo].[uCommerce_GuidList] AS TABLE([Guid] [uniqueidentifier] NOT NULL PRIMARY KEY CLUSTERED)
+             This trick works with pure ADO.NET and is supported by Dapper.NET. At the time of writing,
+             NHibernate does not offer this capability.
+            
+             A typical use case is querying data based on a list of Guids:
+            
+                        var ids = new Guid[] { new Guid("A"), new Guid("B") }
+                        var reader = connection.QueryMultiple(SqlQueries.ProductsQuery, new
+                        {
+                            @ids = ids.AsTableParameter(),
+                            @batchSize = (int) batchSize,
+                            @pageNumber = pageNumber++
+                        });
+            
+             </summary>
+             <param name="source">List of database ids to be passed to a query</param>
+             <returns></returns>
+        </member>
+        <member name="T:Ucommerce.SqlMultiReaderConnector.Interfaces.ISqlMultireaderConnection">
+            <summary>
+            Represents a connection to a datasource that can that return multiple result sets.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.SqlMultiReaderConnector.Interfaces.ISqlMultireaderConnection.QueryMultiple(System.String,System.Object)">
+            <summary>
+            Execute a statement that can return multuple resultsets, and access each in turn.
+            </summary>
+            <param name="sql">The SQL to execute for this query.</param>
+            <param name="parameters">The parameters used for this query.</param>
+            <returns></returns>
+        </member>
+        <member name="T:Ucommerce.SqlMultiReaderConnector.Interfaces.ISqlMultiReaderConnector">
+            <summary>
+            A connector that opens a connection to read mlutuple result sets of a SQL command.
+            </summary>
+        </member>
+        <member name="M:Ucommerce.SqlMultiReaderConnector.Interfaces.ISqlMultiReaderConnector.Open">
+            <summary>
+            Opens a connection to the datasource
+            </summary>
+            <returns>A SqlMultireaderConnection</returns>
+        </member>
+        <member name="T:Ucommerce.SqlMultiReaderConnector.Interfaces.ISqlMultiReader">
+            <summary>
+            The ISqlMultiReader provides an interface for reading multiple result sets from a query
+            </summary>
+        </member>
+        <member name="M:Ucommerce.SqlMultiReaderConnector.Interfaces.ISqlMultiReader.ReadNext``1">
+            <summary>
+            Returns next set of results
+            </summary>
+            <typeparam name="T">The type of the results</typeparam>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="AddUCommerceFilesToOutput">
+    <!-- With help from: http://blog.samstephens.co.nz/2010-10-18/msbuild-including-extra-files-multiple-builds/ -->
+    <ItemGroup>
+      <CustomFilesToInclude Include=".\App_GlobalResources\**\*">
+        <Dir>App_GlobalResources</Dir>
+      </CustomFilesToInclude>
+      <FilesForPackagingFromProject Include="@(CustomFilesToInclude)">
+        <DestinationRelativePath>%(CustomFilesToInclude.Dir)\%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+      </FilesForPackagingFromProject>
+    </ItemGroup>
+  </Target>
+</Project>
